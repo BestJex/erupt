@@ -7,8 +7,8 @@ import java.io.File;
 import java.util.function.Consumer;
 
 /**
- * @author liyuepeng
- * @date 2019-05-21.
+ * @author YuePeng
+ * date 2019-05-21.
  */
 @Slf4j
 public class ProjectUtil {
@@ -22,7 +22,7 @@ public class ProjectUtil {
     public void projectStartLoaded(String projectName, Consumer<Boolean> first) {
         String userDir = System.getProperty("user.dir");
         File dirFile = new File(userDir, EruptConst.ERUPT_DIR);
-        String warnTxt = "项目加载标识文件无法创建，可能造成数据多次加载等问题";
+        String warnTxt = " The erupt initialization ID file could not be created";
         if (!dirFile.exists()) {
             if (!dirFile.mkdirs()) {
                 log.warn(dirFile.toString() + warnTxt);

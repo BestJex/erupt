@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author liyuepeng
- * @date 2018-10-10.
+ * @author YuePeng
+ * date 2018-10-10.
  */
 @Data
 public class EruptFieldModel {
@@ -85,7 +85,7 @@ public class EruptFieldModel {
             // view auto
             for (View view : this.eruptField.views()) {
                 if (ViewType.AUTO == view.type()) {
-                    Map<String, Object> viewValues = getAnnotationMap(view);
+                    Map<String, Object> viewValues = this.getAnnotationMap(view);
                     if (!AnnotationConst.EMPTY_STR.equals(this.eruptField.edit().title())) {
                         switch (this.eruptField.edit().type()) {
                             case ATTACHMENT:
@@ -104,11 +104,19 @@ public class EruptFieldModel {
                             case MAP:
                                 viewValues.put(TYPE, ViewType.MAP);
                                 continue;
+                            case TAB_TABLE_ADD:
+                            case TAB_TREE:
+                            case TAB_TABLE_REFER:
+                            case CHECKBOX:
+                                viewValues.put(TYPE, ViewType.TAB_VIEW);
+                                continue;
                         }
                     }
                     if (boolean.class.getSimpleName().equalsIgnoreCase(this.fieldReturnName.toLowerCase())) {
                         viewValues.put(TYPE, ViewType.BOOLEAN);
                     } else if (Date.class.getSimpleName().equals(this.fieldReturnName)) {
+                        viewValues.put(TYPE, ViewType.DATE);
+                    } else if (this.eruptField.edit().type() == EditType.DATE) {
                         viewValues.put(TYPE, ViewType.DATE);
                     } else if (JavaType.NUMBER.equals(this.fieldReturnName)) {
                         viewValues.put(TYPE, ViewType.NUMBER);
@@ -119,7 +127,7 @@ public class EruptFieldModel {
             }
             // edit auto
             if (StringUtils.isNotBlank(this.eruptField.edit().title()) && EditType.AUTO == this.eruptField.edit().type()) {
-                Map<String, Object> editValues = getAnnotationMap(this.eruptField.edit());
+                Map<String, Object> editValues = this.getAnnotationMap(this.eruptField.edit());
                 //根据返回类型推断
                 if (boolean.class.getSimpleName().equalsIgnoreCase(this.fieldReturnName)) {
                     editValues.put(TYPE, EditType.BOOLEAN);
@@ -144,7 +152,7 @@ public class EruptFieldModel {
         InvocationHandler invocationHandler = Proxy.getInvocationHandler(annotation);
         Field field = invocationHandler.getClass().getDeclaredField("memberValues");
         field.setAccessible(true);
-        return (Map<String, Object>) field.get(invocationHandler);
+        return (Map) field.get(invocationHandler);
     }
 
 }

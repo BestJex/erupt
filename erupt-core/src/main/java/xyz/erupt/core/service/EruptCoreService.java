@@ -14,32 +14,28 @@ import xyz.erupt.annotation.EruptField;
 import xyz.erupt.annotation.sub_erupt.RowOperation;
 import xyz.erupt.annotation.sub_field.Edit;
 import xyz.erupt.annotation.sub_field.EditType;
-import xyz.erupt.core.config.EruptProp;
 import xyz.erupt.core.exception.EruptAnnotationException;
-import xyz.erupt.core.util.AnnotationUtil;
+import xyz.erupt.core.invoke.ExprInvoke;
+import xyz.erupt.core.toolkit.TimeRecorder;
 import xyz.erupt.core.util.EruptSpringUtil;
 import xyz.erupt.core.util.EruptUtil;
 import xyz.erupt.core.util.ReflectUtil;
 import xyz.erupt.core.view.EruptFieldModel;
 import xyz.erupt.core.view.EruptModel;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @author liyuepeng
- * @date 9/28/18.
+ * @author YuePeng
+ * date 9/28/18.
  */
 @Order
 @Service
 @Slf4j
-public final class EruptCoreService implements ApplicationRunner {
-
-    @Resource
-    private EruptProp eruptProp;
+public class EruptCoreService implements ApplicationRunner {
 
     private static final Map<String, EruptModel> ERUPTS = new LinkedCaseInsensitiveMap<>();
 
@@ -59,10 +55,12 @@ public final class EruptCoreService implements ApplicationRunner {
                 fieldModel.setTagList(EruptUtil.getTagList(edit.tagsType()));
             }
         }
-        em.setEruptJson(em.getEruptJson().deepCopy());
-        for (RowOperation operation : em.getErupt().rowOperation()) {
-            if (!AnnotationUtil.getExprBool(operation.show())) {
-                em.getEruptJson().getAsJsonObject("rowOperation").remove(operation.code());
+        if (em.getErupt().rowOperation().length > 0) {
+            em.setEruptJson(em.getEruptJson().deepCopy());
+            for (RowOperation operation : em.getErupt().rowOperation()) {
+                if (!ExprInvoke.getExpr(operation.show())) {
+                    em.getEruptJson().getAsJsonObject("rowOperation").remove(operation.code());
+                }
             }
         }
         return em;
@@ -94,9 +92,10 @@ public final class EruptCoreService implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        TimeRecorder timeRecorder = new TimeRecorder();
         EruptSpringUtil.scannerPackage(EruptApplication.getScanPackage(), new TypeFilter[]{
                 new AnnotationTypeFilter(Erupt.class)
         }, clazz -> ERUPTS.put(clazz.getSimpleName(), initEruptModel(clazz)));
-        log.info("Erupt core initialization complete");
+        log.info("Erupt core initialization completed in {} ms", timeRecorder.recorder());
     }
 }

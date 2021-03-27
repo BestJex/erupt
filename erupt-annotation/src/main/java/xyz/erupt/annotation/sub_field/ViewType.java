@@ -3,8 +3,8 @@ package xyz.erupt.annotation.sub_field;
 import xyz.erupt.annotation.config.Comment;
 
 /**
- * @author liyuepeng
- * @date 2018-11-12.
+ * @author YuePeng
+ * date 2018-11-12.
  */
 public enum ViewType {
     @Comment("根据返回值等特征自动判断")
@@ -43,4 +43,9 @@ public enum ViewType {
     MAP,
     @Comment("代码")
     CODE,
+    @Comment("显示一对多,对多对数据")
+    TAB_VIEW,
+    @Deprecated
+    @Comment("markdown 编辑器")
+    MARKDOWN,
 }

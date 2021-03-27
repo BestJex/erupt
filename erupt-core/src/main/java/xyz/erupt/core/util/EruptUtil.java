@@ -6,11 +6,12 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import xyz.erupt.annotation.EruptField;
-import xyz.erupt.annotation.PreDataProxy;
 import xyz.erupt.annotation.config.QueryExpression;
 import xyz.erupt.annotation.constant.AnnotationConst;
-import xyz.erupt.annotation.fun.*;
-import xyz.erupt.annotation.sub_erupt.Power;
+import xyz.erupt.annotation.fun.AttachmentProxy;
+import xyz.erupt.annotation.fun.ChoiceFetchHandler;
+import xyz.erupt.annotation.fun.TagsFetchHandler;
+import xyz.erupt.annotation.fun.VLModel;
 import xyz.erupt.annotation.sub_field.Edit;
 import xyz.erupt.annotation.sub_field.EditType;
 import xyz.erupt.annotation.sub_field.EditTypeSearch;
@@ -26,12 +27,11 @@ import xyz.erupt.core.view.EruptModel;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 /**
- * @author liyuepeng
- * @date 11/1/18.
+ * @author YuePeng
+ * date 11/1/18.
  */
 public class EruptUtil {
 
@@ -58,7 +58,7 @@ public class EruptUtil {
                             ReferenceTreeType referenceTreeType = eruptField.edit().referenceTreeType();
                             id = referenceTreeType.id();
                             label = referenceTreeType.label();
-                        } else if (eruptField.edit().type() == EditType.REFERENCE_TABLE) {
+                        } else {
                             ReferenceTableType referenceTableType = eruptField.edit().referenceTableType();
                             id = referenceTableType.id();
                             label = referenceTableType.label();
@@ -96,8 +96,6 @@ public class EruptUtil {
                         for (Object o : collectionRef) {
                             list.add(generateEruptDataMap(tabEruptModelRef, o));
                         }
-//                            bi.getBiCharts().stream().sorted(Comparator.comparing(BiChart::getSort, Comparator.nullsFirst(Integer::compareTo))).collect(Collectors.toList())
-//                            list.stream().sorted()
                         map.put(field.getName(), list);
                         break;
                     default:
@@ -267,27 +265,6 @@ public class EruptUtil {
             }
         }
         return EruptApiModel.successApi();
-    }
-
-    //处理dataProxy回调对象
-    public static void handlerDataProxy(EruptModel eruptModel, Consumer<DataProxy> consumer) {
-        PreDataProxy preDataProxy = eruptModel.getClazz().getAnnotation(PreDataProxy.class);
-        if (null != preDataProxy) {
-            consumer.accept(EruptSpringUtil.getBean(preDataProxy.value()));
-        }
-        for (Class<? extends DataProxy> proxy : eruptModel.getErupt().dataProxy()) {
-            consumer.accept(EruptSpringUtil.getBean(proxy));
-        }
-    }
-
-    //动态获取erupt power值
-    public static PowerObject getPowerObject(EruptModel eruptModel) {
-        Power power = eruptModel.getErupt().power();
-        PowerObject powerBean = new PowerObject(power);
-        if (!power.powerHandler().isInterface()) {
-            EruptSpringUtil.getBean(power.powerHandler()).handler(powerBean);
-        }
-        return powerBean;
     }
 
     public static Object toEruptId(EruptModel eruptModel, String id) {

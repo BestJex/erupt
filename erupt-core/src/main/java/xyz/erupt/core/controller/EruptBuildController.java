@@ -6,8 +6,8 @@ import xyz.erupt.annotation.sub_erupt.RowOperation;
 import xyz.erupt.core.annotation.EruptRouter;
 import xyz.erupt.core.constant.EruptRestPath;
 import xyz.erupt.core.exception.EruptNoLegalPowerException;
+import xyz.erupt.core.invoke.PowerInvoke;
 import xyz.erupt.core.service.EruptCoreService;
-import xyz.erupt.core.util.EruptUtil;
 import xyz.erupt.core.view.EruptBuildModel;
 import xyz.erupt.core.view.EruptFieldModel;
 import xyz.erupt.core.view.EruptModel;
@@ -17,8 +17,8 @@ import java.util.LinkedHashMap;
 /**
  * Erupt 页面结构构建信息
  *
- * @author liyuepeng
- * @date 2018-09-28.
+ * @author YuePeng
+ * date 2018-09-28.
  */
 @RestController
 @RequestMapping(EruptRestPath.ERUPT_BUILD)
@@ -30,7 +30,7 @@ public class EruptBuildController {
     public EruptBuildModel getEruptBuild(@PathVariable("erupt") String eruptName) {
         EruptModel eruptView = EruptCoreService.getEruptView(eruptName);
         EruptBuildModel eruptBuildModel = new EruptBuildModel();
-        eruptBuildModel.setPower(EruptUtil.getPowerObject(eruptView));
+        eruptBuildModel.setPower(PowerInvoke.getPowerObject(eruptView));
         eruptBuildModel.setEruptModel(eruptView);
         for (EruptFieldModel fieldModel : eruptView.getEruptFieldModels()) {
             switch (fieldModel.getEruptField().edit().type()) {

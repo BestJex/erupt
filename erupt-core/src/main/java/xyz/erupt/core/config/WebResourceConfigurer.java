@@ -8,8 +8,8 @@ import xyz.erupt.core.constant.EruptRestPath;
 import javax.annotation.Resource;
 
 /**
- * @author liyuepeng
- * @date 2020-08-20
+ * @author YuePeng
+ * date 2020-08-20
  */
 @Configuration
 public class WebResourceConfigurer implements WebMvcConfigurer {
@@ -23,8 +23,7 @@ public class WebResourceConfigurer implements WebMvcConfigurer {
         if (!eruptProp.getUploadPath().endsWith("/")) {
             uploadPath += "/";
         }
-        registry.addResourceHandler(EruptRestPath.ERUPT_ATTACHMENT + "/**")
-                .addResourceLocations("file:" + uploadPath);
+        registry.addResourceHandler(EruptRestPath.ERUPT_ATTACHMENT + "/**").addResourceLocations("file:" + uploadPath);
     }
 
 }

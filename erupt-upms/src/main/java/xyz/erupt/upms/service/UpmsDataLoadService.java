@@ -1,38 +1,38 @@
 package xyz.erupt.upms.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import xyz.erupt.core.util.ProjectUtil;
 import xyz.erupt.jpa.dao.EruptDao;
-import xyz.erupt.upms.constant.MenuTypeEnum;
+import xyz.erupt.upms.enums.MenuTypeEnum;
 import xyz.erupt.upms.model.*;
 import xyz.erupt.upms.model.log.EruptLoginLog;
 import xyz.erupt.upms.model.log.EruptOperateLog;
 import xyz.erupt.upms.util.MD5Utils;
 
+import javax.annotation.Resource;
 import javax.transaction.Transactional;
 import java.util.Date;
 
 /**
- * @author liyuepeng
- * @date 2019-07-15.
+ * @author YuePeng
+ * date 2019-07-15.
  */
 @Service
 @Order
 @Slf4j
 public class UpmsDataLoadService implements CommandLineRunner {
 
-    @Autowired
+    @Resource
     private EruptDao eruptDao;
 
     public static final String DEFAULT_ACCOUNT = "erupt";
 
     @Transactional
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         new ProjectUtil().projectStartLoaded("upms", first -> {
             if (first) {
                 //用户
@@ -45,7 +45,6 @@ public class UpmsDataLoadService implements CommandLineRunner {
                 eruptUser.setPassword(MD5Utils.digest(DEFAULT_ACCOUNT));
                 eruptUser.setName(DEFAULT_ACCOUNT);
                 eruptDao.persistIfNotExist(EruptUser.class, eruptUser, "account", eruptUser.getAccount());
-
                 //菜单
                 String code = "code";
                 String manager = "$manager";
@@ -61,6 +60,9 @@ public class UpmsDataLoadService implements CommandLineRunner {
                 eruptDao.persistIfNotExist(EruptMenu.class, new EruptMenu(
                         EruptOrg.class.getSimpleName(), "组织维护", MenuTypeEnum.TREE.getCode(), EruptOrg.class.getSimpleName(), open, 30, "fa fa-users", eruptMenu
                 ), code, EruptOrg.class.getSimpleName());
+                eruptDao.persistIfNotExist(EruptMenu.class, new EruptMenu(
+                        EruptPost.class.getSimpleName(), "岗位维护", MenuTypeEnum.TABLE.getCode(), EruptPost.class.getSimpleName(), open, 35, "fa fa-id-card", eruptMenu
+                ), code, EruptPost.class.getSimpleName());
                 eruptDao.persistIfNotExist(EruptMenu.class, new EruptMenu(
                         EruptUser.class.getSimpleName(), "用户维护", MenuTypeEnum.TABLE.getCode(), EruptUser.class.getSimpleName(), open, 40, "fa fa-user", eruptMenu
                 ), code, EruptUser.class.getSimpleName());

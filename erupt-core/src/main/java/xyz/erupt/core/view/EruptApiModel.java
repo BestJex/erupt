@@ -1,18 +1,17 @@
 package xyz.erupt.core.view;
 
 import lombok.Data;
-import xyz.erupt.annotation.model.BoolAndReason;
 
 /**
- * @author liyuepeng
- * @date 2018-10-09.
+ * @author YuePeng
+ * date 2018-10-09.
  */
 @Data
 public class EruptApiModel {
 
     private Status status;
 
-    private PromptWay promptWay = PromptWay.DIALOG;
+    private PromptWay promptWay;
 
     private String message;
 
@@ -73,7 +72,6 @@ public class EruptApiModel {
     public enum PromptWay {
         DIALOG, MESSAGE, NOTIFY
     }
-
 
 }
 

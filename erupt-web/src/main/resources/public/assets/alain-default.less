@@ -25822,16 +25822,14 @@ nz-picker, nz-picker .ant-calendar-picker {
   height: 100%;
 }
 
+reuse-tab .ant-tabs-tab-arrow-show {
+  color: #FF5722;
+}
+
 //iframe page-container style start
 .alain-default__collapsed {
   .page-container {
     left: @alain-default-aside-collapsed-wd;
-  }
-}
-
-reuse-tab ~ app-page {
-  .page-container {
-    top: 116px;
   }
 }
 
@@ -25843,12 +25841,24 @@ reuse-tab ~ app-page {
   bottom: 0;
 }
 
+reuse-tab ~ app-site .page-container,
+reuse-tab ~ app-home .page-container,
+reuse-tab ~ app-tpl .page-container {
+  top: @alain-default-header-hg + 40;
+}
+
 @media screen and (max-width: 767px) {
   .page-container {
     height: calc(100vh - @alain-default-header-hg);
     left: 0 !important;
-    top: 0 !important;
+    top: 0;
     margin: 0 -25px;
+  }
+
+  reuse-tab ~ app-site .page-container,
+  reuse-tab ~ app-home .page-container,
+  reuse-tab ~ app-tpl .page-container {
+    top: 40px;
   }
 }
 
@@ -25884,8 +25894,8 @@ html {
   //background: #fff;
 }
 
-.alain-default__header {
-  box-shadow: 0 1px #dadfe6;
+.ant-table-body > table {
+  border: 1px solid #e8e8e8 !important;
 }
 
 .alain-default__progress-bar {
@@ -25910,7 +25920,7 @@ html {
 }
 
 .page-header {
-  margin-bottom: 16px !important;
+  margin-bottom: 0 !important;
 
   .ant-breadcrumb {
     margin-bottom: 12px;
@@ -25938,6 +25948,11 @@ img[src='erupt.svg'] {
 
 //暗黑模式
 .dark {
+  //.reuse-tab{
+  //  left: 0;
+  //  top: 0;
+  //}
+
   .alain-default__content, .ant-modal-content, .alain-default__aside, img[src='erupt.svg'] {
     filter: invert(1) hue-rotate(180deg);
   }

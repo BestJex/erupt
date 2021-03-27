@@ -3,8 +3,8 @@ package xyz.erupt.annotation.sub_field.sub_edit;
 import xyz.erupt.annotation.config.Comment;
 
 /**
- * @author liyuepeng
- * @date 2018-09-28.
+ * @author YuePeng
+ * date 2018-09-28.
  */
 public @interface Search {
 
@@ -13,7 +13,7 @@ public @interface Search {
     @Deprecated
     boolean notNull() default false;
 
-    @Comment("模糊查询")
+    @Comment("高级查询")
     boolean vague() default false;
 
 }

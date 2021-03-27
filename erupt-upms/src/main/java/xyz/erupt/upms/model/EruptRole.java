@@ -8,14 +8,16 @@ import xyz.erupt.annotation.sub_field.Edit;
 import xyz.erupt.annotation.sub_field.EditType;
 import xyz.erupt.annotation.sub_field.View;
 import xyz.erupt.annotation.sub_field.sub_edit.BoolType;
+import xyz.erupt.annotation.sub_field.sub_edit.TagsType;
 import xyz.erupt.jpa.model.BaseModel;
+import xyz.erupt.upms.enums.MenuLimitEnum;
 
 import javax.persistence.*;
 import java.util.Set;
 
 /**
- * @author liyuepeng
- * @date 2018-11-22.
+ * @author YuePeng
+ * date 2018-11-22.
  */
 @Entity
 @Table(name = "e_upms_role", uniqueConstraints = {
@@ -43,10 +45,21 @@ public class EruptRole extends BaseModel {
             edit = @Edit(
                     title = "状态",
                     type = EditType.BOOLEAN,
+                    notNull = true,
                     boolType = @BoolType(trueText = "启用", falseText = "禁用")
             )
     )
-    private Boolean status;
+    private Boolean status = true;
+
+    @EruptField(
+            views = @View(title = "操作权限", template = "value&&value.replace(/\\|/g,'<span class=\"text-red\"> | </span>')"),
+            edit = @Edit(
+                    title = "操作权限",
+                    type = EditType.TAGS,
+                    tagsType = @TagsType(fetchHandler = MenuLimitEnum.MenuLimitFetch.class, allowExtension = false)
+            )
+    )
+    private String powerOff;
 
     @ManyToMany
     @JoinTable(
@@ -54,17 +67,20 @@ public class EruptRole extends BaseModel {
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "menu_id", referencedColumnName = "id"))
     @EruptField(
+            views = @View(title = "菜单权限"),
             edit = @Edit(
-                    title = "菜单",
+                    title = "菜单权限",
                     type = EditType.TAB_TREE
             )
     )
     private Set<EruptMenu> menus;
 
-    @JoinTable(name = "e_upms_user_role", joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
     @ManyToMany
+    @JoinTable(name = "e_upms_user_role",
+            joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
     @EruptField(
+            views = @View(title = "包含用户"),
             edit = @Edit(
                     title = "包含用户",
                     type = EditType.TAB_TABLE_REFER

@@ -6,13 +6,13 @@ import java.beans.Transient;
 import java.util.Map;
 
 /**
- * @author liyuepeng
- * @date 2019-10-16.
+ * @author YuePeng
+ * date 2019-10-16.
  */
 public @interface Tpl {
 
-    @Comment("模板文件的位置")
     @Transient
+    @Comment("模板文件路径")
     String path();
 
     @Transient
@@ -28,12 +28,14 @@ public @interface Tpl {
     Engine engine() default Engine.FreeMarker;
 
     enum Engine {
-        @Comment("Native模式下不支持tplHandler")
+        @Comment("原生H5, Native模式下不支持tplHandler")
         Native,
         @Comment("FreeMarker")
         FreeMarker,
         @Comment("Thymeleaf")
-        Thymeleaf
+        Thymeleaf,
+        @Comment("Velocity")
+        Velocity
     }
 
     interface TplHandler {

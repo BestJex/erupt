@@ -1,10 +1,11 @@
 package xyz.erupt.upms.util;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
- * @author liyuepeng
- * @date 2018-10-10.
+ * @author YuePeng
+ * date 2018-10-10.
  */
 public class MD5Utils {
 
@@ -26,14 +27,14 @@ public class MD5Utils {
 
     private static String byteToString(byte[] bByte) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bByte.length; i++) {
-            sb.append(byteToArrayString(bByte[i]));
+        for (byte b : bByte) {
+            sb.append(byteToArrayString(b));
         }
         return sb.toString();
     }
 
     public static String digest(String strObj) {
-        return digest(strObj, "utf-8");
+        return digest(strObj, StandardCharsets.UTF_8.name());
     }
 
     public static String digest(String strObj, String charset) {
@@ -45,7 +46,7 @@ public class MD5Utils {
         }
     }
 
-    // str -> md5str -> md5(md5str+salt )-> md5salt
+    // str -> md5str -> md5(md5str + salt )-> md5salt
     public static String digestSalt(String strObj, String salt) {
         strObj = digest(strObj);
         strObj += salt;

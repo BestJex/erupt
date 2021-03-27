@@ -2,6 +2,7 @@ package xyz.erupt.job.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 import xyz.erupt.annotation.Erupt;
 import xyz.erupt.annotation.EruptField;
 import xyz.erupt.annotation.sub_erupt.Power;
@@ -10,7 +11,6 @@ import xyz.erupt.annotation.sub_field.EditType;
 import xyz.erupt.annotation.sub_field.View;
 import xyz.erupt.annotation.sub_field.ViewType;
 import xyz.erupt.annotation.sub_field.sub_edit.BoolType;
-import xyz.erupt.annotation.sub_field.sub_edit.DateType;
 import xyz.erupt.annotation.sub_field.sub_edit.Search;
 import xyz.erupt.jpa.model.BaseModel;
 
@@ -18,8 +18,8 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
- * @author liyuepeng
- * @date 2019-12-26
+ * @author YuePeng
+ * date 2019-12-26
  */
 @Erupt(
         orderBy = "startTime desc",
@@ -52,9 +52,7 @@ public class EruptJobLog extends BaseModel {
     private Boolean status;
 
     @EruptField(
-            views = @View(title = "开始时间"),
-            edit = @Edit(title = "开始时间", search = @Search(vague = true),
-                    dateType = @DateType(type = DateType.Type.DATE_TIME))
+            views = @View(title = "开始时间")
     )
     private Date startTime;
 
@@ -64,6 +62,7 @@ public class EruptJobLog extends BaseModel {
     private Date endTime;
 
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     @EruptField(
             views = @View(title = "执行结果"),
             edit = @Edit(title = "执行结果")
@@ -71,6 +70,7 @@ public class EruptJobLog extends BaseModel {
     private String resultInfo;
 
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     @EruptField(
             views = @View(title = "错误信息", type = ViewType.HTML),
             edit = @Edit(title = "错误信息")

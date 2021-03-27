@@ -19,8 +19,8 @@ import javax.persistence.Table;
 import java.util.Date;
 
 /**
- * @author liyuepeng
- * @date 2019-11-27.
+ * @author YuePeng
+ * date 2019-11-27.
  */
 @Entity
 @Table(name = "e_upms_login_log")
@@ -76,4 +76,6 @@ public class EruptLoginLog extends BaseModel {
             edit = @Edit(title = "设备类型", search = @Search)
     )
     private String deviceType;
+
+    private String token;
 }

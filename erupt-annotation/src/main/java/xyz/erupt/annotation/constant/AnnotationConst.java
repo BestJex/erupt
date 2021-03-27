@@ -1,8 +1,8 @@
 package xyz.erupt.annotation.constant;
 
 /**
- * @author liyuepeng
- * @date 2019-07-05.
+ * @author YuePeng
+ * date 2019-07-05.
  */
 public class AnnotationConst {
 
@@ -13,4 +13,6 @@ public class AnnotationConst {
     public static final String PID = "pid";
 
     public static final String EMPTY_STR = "";
+
+    public static final int REMARK_LENGTH = 2000;
 }

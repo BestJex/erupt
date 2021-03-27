@@ -10,8 +10,8 @@ import xyz.erupt.annotation.sub_field.sub_edit.*;
 import java.beans.Transient;
 
 /**
- * @author liyuepeng
- * @date 2018-09-28.
+ * @author YuePeng
+ * date 2018-09-28.
  */
 public @interface Edit {
 
@@ -32,7 +32,7 @@ public @interface Edit {
     @Comment("输入字段预期值的提示信息")
     String placeHolder() default "";
 
-    @Match("value.dependField()")
+    @Match("#value.dependField() != ''")
     @Comment("显示依赖")
     ShowBy showBy() default @ShowBy(dependField = "", expr = "");
 
@@ -47,48 +47,49 @@ public @interface Edit {
     @Comment("数据过滤表达式，在修饰类型为对象时可用")
     Filter[] filter() default {};
 
+    @Comment("组件类型")
     EditType type() default EditType.AUTO;
 
-    @Match("item.type()=='INPUT'")
+    @Match("#item.type().toString()=='INPUT'")
     InputType inputType() default @InputType;
 
-    @Match("item.type()=='NUMBER'")
+    @Match("#item.type().toString()=='NUMBER'")
     NumberType numberType() default @NumberType;
 
-    @Match("item.type()=='SLIDER'")
+    @Match("#item.type().toString()=='SLIDER'")
     SliderType sliderType() default @SliderType(max = 999);
 
-    @Match("item.type()=='DATE'")
+    @Match("#item.type().toString()=='DATE'")
     DateType dateType() default @DateType;
 
-    @Match("item.type()=='BOOLEAN'")
+    @Match("#item.type().toString()=='BOOLEAN'")
     BoolType boolType() default @BoolType;
 
-    @Match("item.type()=='CHOICE'")
+    @Match("#item.type().toString()=='CHOICE'")
     ChoiceType choiceType() default @ChoiceType;
 
-    @Match("item.type()=='TAGS'")
+    @Match("#item.type().toString()=='TAGS'")
     TagsType tagsType() default @TagsType;
 
-    @Match("item.type()=='ATTACHMENT'")
+    @Match("#item.type().toString()=='ATTACHMENT'")
     AttachmentType attachmentType() default @AttachmentType;
 
-    @Match("item.type()=='HTML_EDITOR'")
+    @Match("#item.type().toString()=='HTML_EDITOR'")
     HtmlEditorType htmlEditorType() default @HtmlEditorType(HtmlEditorType.Type.UEDITOR);
 
-    @Match("item.type()=='AUTO_COMPLETE'")
+    @Match("#item.type().toString()=='AUTO_COMPLETE'")
     AutoCompleteType autoCompleteType() default @AutoCompleteType(handler = AutoCompleteHandler.class);
 
-    @Match("item.type()=='REFERENCE_TREE'")
+    @Match("#item.type().toString()=='REFERENCE_TREE'")
     ReferenceTreeType referenceTreeType() default @ReferenceTreeType;
 
-    @Match("item.type()=='REFERENCE_TABLE'")
+    @Match("#item.type().toString()=='REFERENCE_TABLE'")
     ReferenceTableType referenceTableType() default @ReferenceTableType;
 
-    @Match("item.type()=='CHECKBOX'")
+    @Match("#item.type().toString()=='CHECKBOX'")
     CheckboxType checkboxType() default @CheckboxType;
 
-    @Match("item.type()=='CODE_EDITOR'")
+    @Match("#item.type().toString()=='CODE_EDITOR'")
     CodeEditorType codeEditType() default @CodeEditorType(language = "sql");
 
     @Transient

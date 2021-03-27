@@ -1,69 +1,95 @@
 package xyz.erupt.upms.controller;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.wf.captcha.ArithmeticCaptcha;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.wf.captcha.SpecCaptcha;
+import com.wf.captcha.base.Captcha;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.web.bind.annotation.*;
 import xyz.erupt.core.annotation.EruptRouter;
+import xyz.erupt.core.config.EruptAppProp;
 import xyz.erupt.core.constant.EruptRestPath;
 import xyz.erupt.core.view.EruptApiModel;
 import xyz.erupt.upms.base.LoginModel;
+import xyz.erupt.upms.config.EruptUpmsConfig;
 import xyz.erupt.upms.constant.EruptReqHeaderConst;
 import xyz.erupt.upms.constant.SessionKey;
-import xyz.erupt.upms.model.EruptMenu;
+import xyz.erupt.upms.fun.LoginProxy;
 import xyz.erupt.upms.model.EruptUser;
-import xyz.erupt.upms.service.EruptMenuService;
 import xyz.erupt.upms.service.EruptSessionService;
 import xyz.erupt.upms.service.EruptUserService;
+import xyz.erupt.upms.util.IpUtil;
 import xyz.erupt.upms.vo.EruptMenuVo;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
- * @author liyuepeng
- * @date 2018-12-13.
+ * @author YuePeng
+ * date 2018-12-13.
  */
 @RestController
 @RequestMapping(EruptRestPath.ERUPT_API)
 public class EruptUserController {
 
-    @Autowired
-    private EruptMenuService menuService;
-
-    @Autowired
+    @Resource
     private EruptUserService eruptUserService;
 
-    @Autowired
+    @Resource
     private EruptSessionService sessionService;
 
-    @Autowired
-    private Gson gson;
+    @Resource
+    private EruptAppProp eruptAppProp;
+
+    @Resource
+    private EruptUpmsConfig eruptUpmsConfig;
 
     //登录
+    @SneakyThrows
     @PostMapping("/login")
     @ResponseBody
     public LoginModel login(@RequestParam("account") String account,
                             @RequestParam("pwd") String pwd,
-                            @RequestParam(name = "verifyCode", required = false) String verifyCode,
-                            HttpServletRequest request) {
-        LoginModel loginModel = eruptUserService.login(account, pwd, verifyCode, request);
-        if (loginModel.isPass()) {
-            //生成token
-            EruptUser eruptUser = loginModel.getEruptUser();
-            eruptUserService.createToken(loginModel);
-            loginModel.setUserName(eruptUser.getName());
-            EruptMenu indexMenu = eruptUser.getEruptMenu();
-            if (null != indexMenu) {
-                loginModel.setIndexMenu(indexMenu.getType() + "||" + indexMenu.getValue());
+                            @RequestParam(name = "verifyCode", required = false) String verifyCode) {
+        if (!eruptUserService.checkVerifyCode(verifyCode)) {
+            LoginModel loginModel = new LoginModel();
+            loginModel.setUseVerifyCode(true);
+            loginModel.setReason("验证码错误");
+            loginModel.setPass(false);
+            return loginModel;
+        }
+        LoginProxy loginProxy = EruptUserService.findEruptLogin();
+        LoginModel loginModel;
+        if (null == loginProxy) {
+            loginModel = eruptUserService.login(account, pwd);
+        } else {
+            loginModel = new LoginModel();
+            try {
+                EruptUser eruptUser = loginProxy.login(account, pwd);
+                loginModel.setEruptUser(eruptUser);
+                loginModel.setPass(true);
+            } catch (Exception e) {
+                if (0 == eruptAppProp.getVerifyCodeCount()) {
+                    loginModel.setUseVerifyCode(true);
+                }
+                loginModel.setReason(e.getMessage());
+                loginModel.setPass(false);
+
             }
-            List<EruptMenu> eruptMenus = menuService.getMenuList(eruptUser);
-            sessionService.put(SessionKey.MENU + loginModel.getToken(), gson.toJson(eruptMenus));
-            sessionService.put(SessionKey.MENU_VIEW + loginModel.getToken(), gson.toJson(menuService.geneMenuListVo(eruptMenus)));
-            //记录登录日志
-            eruptUserService.saveLoginLog(eruptUser);
+        }
+        if (loginModel.isPass()) {
+            EruptUser eruptUser = loginModel.getEruptUser();
+            loginModel.setToken(RandomStringUtils.random(16, true, true));
+            loginModel.setExpire(this.eruptUserService.getExpireTime());
+            sessionService.put(SessionKey.USER_TOKEN + loginModel.getToken(), loginModel.getEruptUser().getId().toString(), eruptUpmsConfig.getExpireTimeByLogin());
+            if (null != loginProxy) {
+                loginProxy.loginSuccess(eruptUser, loginModel.getToken());
+            }
+            eruptUserService.cacheUserInfo(eruptUser, loginModel.getToken());
+            eruptUserService.saveLoginLog(eruptUser, loginModel.getToken()); //记录登录日志
         }
         return loginModel;
     }
@@ -73,7 +99,7 @@ public class EruptUserController {
     @ResponseBody
     @EruptRouter(verifyType = EruptRouter.VerifyType.LOGIN, authIndex = 0)
     public List<EruptMenuVo> getMenu() {
-        return sessionService.get(SessionKey.MENU_VIEW + eruptUserService.getToken(), new TypeToken<List<EruptMenuVo>>() {
+        return sessionService.get(SessionKey.MENU_VIEW + eruptUserService.getCurrentToken(), new TypeToken<List<EruptMenuVo>>() {
         }.getType());
     }
 
@@ -83,21 +109,18 @@ public class EruptUserController {
     @EruptRouter(verifyType = EruptRouter.VerifyType.LOGIN, authIndex = 0)
     public EruptApiModel logout(HttpServletRequest request) {
         String token = request.getHeader(EruptReqHeaderConst.ERUPT_HEADER_TOKEN);
-        sessionService.remove(SessionKey.MENU + token);
+        sessionService.remove(SessionKey.MENU_VALUE_MAP + token);
+        sessionService.remove(SessionKey.MENU_CODE_MAP + token);
         sessionService.remove(SessionKey.MENU_VIEW + token);
         sessionService.remove(SessionKey.USER_TOKEN + token);
+        LoginProxy loginProxy = EruptUserService.findEruptLogin();
+        if (null != loginProxy) {
+            loginProxy.logout(token);
+        }
         return EruptApiModel.successApi();
     }
 
-    /**
-     * 修改密码
-     *
-     * @param account 用户名
-     * @param pwd     密码
-     * @param newPwd  新密码
-     * @param newPwd2 确认新密码
-     * @return 结果
-     */
+    // 修改密码
     @PostMapping("/change-pwd")
     @ResponseBody
     @EruptRouter(verifyType = EruptRouter.VerifyType.LOGIN, authIndex = 0)
@@ -108,24 +131,23 @@ public class EruptUserController {
         return eruptUserService.changePwd(account, pwd, newPwd, newPwd2);
     }
 
+    @GetMapping("/token-valid")
+    @ResponseBody
+    public boolean tokenValid() {
+        return sessionService.get(eruptUserService.getCurrentToken()) != null;
+    }
 
-    /**
-     * 生成验证码
-     */
+    // 生成验证码
     @GetMapping
     @RequestMapping("/code-img")
-    public void createCode(@RequestParam("account") String account, HttpServletResponse response) throws Exception {
-        // 设置响应的类型格式为图片格式
-        response.setContentType("image/jpeg");
-        // 禁止图像缓存。
-        response.setHeader("Pragma", "no-cache");
+    public void createCode(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.setContentType("image/jpeg"); // 设置响应的类型格式为图片格式
+        response.setHeader("Pragma", "no-cache"); // 禁止图像缓存。
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);
-        ArithmeticCaptcha captcha = new ArithmeticCaptcha(150, 38, 3);
-        // 验证码过期时间1分钟
-        sessionService.put(SessionKey.VERIFY_CODE + account, captcha.text(), 60);
-        // 响应图片
-        captcha.out(response.getOutputStream());
+        Captcha captcha = new SpecCaptcha(150, 38, 4);
+        sessionService.put(SessionKey.VERIFY_CODE + IpUtil.getIpAddr(request), captcha.text(), 60, TimeUnit.SECONDS);
+        captcha.out(response.getOutputStream()); // 响应图片
     }
 
 }

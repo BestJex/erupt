@@ -13,8 +13,8 @@ import java.io.InputStream;
 import java.net.InetAddress;
 
 /**
- * @author liyuepeng
- * @date 2018-12-24.
+ * @author YuePeng
+ * date 2018-12-24.
  */
 @Slf4j
 public class IpUtil {
@@ -22,16 +22,13 @@ public class IpUtil {
     public static String getIpAddr(HttpServletRequest request) {
         try {
             String ip = request.getHeader("x-forwarded-for");
-            if (ip == null || ip.length() == 0
-                    || "unknown".equalsIgnoreCase(ip)) {
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
                 ip = request.getHeader("Proxy-Client-IP");
             }
-            if (ip == null || ip.length() == 0
-                    || "unknown".equalsIgnoreCase(ip)) {
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
                 ip = request.getHeader("WL-Proxy-Client-IP");
             }
-            if (ip == null || ip.length() == 0
-                    || "unknown".equalsIgnoreCase(ip)) {
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
                 ip = request.getRemoteAddr();
                 if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
                     // 根据网卡取本机配置的IP
@@ -78,9 +75,10 @@ public class IpUtil {
     @SneakyThrows
     public static String getCityInfo(String ip) {
         if (!Util.isIpAddress(ip)) {
-            log.warn("Error: Invalid ip address");
+            log.warn("Error: Invalid ip address ({})",ip);
             return "";
         }
         return new DbSearcher(new DbConfig(), fileByte).memorySearch(ip).getRegion();
     }
+
 }

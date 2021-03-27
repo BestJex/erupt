@@ -9,11 +9,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import xyz.erupt.core.invoke.DataProcessorManager;
 import xyz.erupt.core.query.Column;
 import xyz.erupt.core.query.Condition;
 import xyz.erupt.core.query.EruptQuery;
 import xyz.erupt.core.service.IEruptDataService;
-import xyz.erupt.core.util.DataProcessorManager;
 import xyz.erupt.core.view.EruptModel;
 import xyz.erupt.core.view.Page;
 
@@ -22,13 +22,14 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * @author liyuepeng
- * @date 2020-03-06.
+ * @author YuePeng
+ * date 2020-03-06.
  */
 @Service
 public class EruptMongodbImpl implements IEruptDataService, ApplicationRunner {
 
     public static final String MONGODB_PROCESS = "mongodb";
+
     @Resource
     private MongoTemplate mongoTemplate;
 
@@ -126,7 +127,7 @@ public class EruptMongodbImpl implements IEruptDataService, ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         DataProcessorManager.register(MONGODB_PROCESS, EruptMongodbImpl.class);
     }
 }

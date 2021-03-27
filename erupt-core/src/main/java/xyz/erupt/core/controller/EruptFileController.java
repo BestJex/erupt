@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import lombok.Cleanup;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import xyz.erupt.core.annotation.EruptRouter;
 import xyz.erupt.core.config.EruptProp;
 import xyz.erupt.core.constant.EruptRestPath;
 import xyz.erupt.core.exception.EruptNoLegalPowerException;
+import xyz.erupt.core.invoke.PowerInvoke;
 import xyz.erupt.core.service.EruptCoreService;
 import xyz.erupt.core.util.DateUtil;
 import xyz.erupt.core.util.EruptUtil;
@@ -35,11 +35,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * @author liyuepeng
- * @date 10/15/18.
+ * @author YuePeng
+ * date 10/15/18.
  */
 @RestController
 @RequestMapping(EruptRestPath.ERUPT_FILE)
@@ -58,9 +59,8 @@ public class EruptFileController {
         }
         try {
             //生成存储路径
-
             EruptModel eruptModel = EruptCoreService.getErupt(eruptName);
-            PowerObject powerObject = EruptUtil.getPowerObject(eruptModel);
+            PowerObject powerObject = PowerInvoke.getPowerObject(eruptModel);
             if (!powerObject.isEdit() && !powerObject.isAdd()) {
                 throw new EruptNoLegalPowerException();
             }
@@ -68,7 +68,6 @@ public class EruptFileController {
             String path;
             if (eruptProp.isKeepUploadFileName()) {
                 path = File.separator + DateUtil.getFormatDate(new Date(), DateUtil.DATE) + File.separator +
-                        RandomUtils.nextInt(100, 999) + "-" +
                         file.getOriginalFilename()
                                 .replace("&", "")
                                 .replace("?", "")
@@ -200,18 +199,18 @@ public class EruptFileController {
                                    HttpServletResponse response, HttpServletRequest request) throws IOException, ClassNotFoundException {
         if (null == file) {
             @Cleanup InputStream stream = EruptFileController.class.getClassLoader().getResourceAsStream("ueditor.json");
-            String json = StreamUtils.copyToString(stream, Charset.forName("utf-8"));
+            String json = StreamUtils.copyToString(stream, Charset.forName(StandardCharsets.UTF_8.name()));
             if (null == callback) {
-                IOUtils.write(json, response.getOutputStream(), "UTF-8");
+                IOUtils.write(json, response.getOutputStream(), StandardCharsets.UTF_8.name());
             } else {
-                IOUtils.write(callback + "(" + json + ")", response.getOutputStream(), "UTF-8");
+                IOUtils.write(callback + "(" + json + ")", response.getOutputStream(), StandardCharsets.UTF_8.name());
             }
 
         } else {
             Map<String, Object> map = uploadHtmlEditorImage(eruptName, fieldName, file);
             Boolean status = (Boolean) map.get("uploaded");
             map.put("state", status ? "SUCCESS" : "ERROR");
-            IOUtils.write(new Gson().toJson(map), response.getOutputStream(), "UTF-8");
+            IOUtils.write(new Gson().toJson(map), response.getOutputStream(), StandardCharsets.UTF_8.name());
         }
     }
 

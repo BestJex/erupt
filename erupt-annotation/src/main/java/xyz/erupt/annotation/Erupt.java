@@ -10,8 +10,8 @@ import java.beans.Transient;
 import java.lang.annotation.*;
 
 /**
- * @author liyuepeng
- * @date 2018-09-28.
+ * @author YuePeng
+ * date 2018-09-28.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -60,7 +60,7 @@ public @interface Erupt {
     @Comment("树节点配置")
     Tree tree() default @Tree;
 
-    @Match("value.field()")
+    @Match("#value.field() != ''")
     @Comment("左树右表配置项")
     LinkTree linkTree() default @LinkTree(field = "");
 
@@ -69,5 +69,6 @@ public @interface Erupt {
     KV[] param() default {};
 
     @Deprecated
+    @Transient
     Class<? extends Annotation> extra() default Annotation.class;
 }
